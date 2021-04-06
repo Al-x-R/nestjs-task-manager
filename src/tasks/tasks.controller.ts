@@ -17,8 +17,10 @@ import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
-import { TaskEntity } from './task.entity';
+import { Task } from './task.entity';
 import { TaskStatus } from './task-status.enum';
+import { User } from '../auth/user.entity';
+import { GetUser } from '../auth/get-user.decorator';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
@@ -31,14 +33,14 @@ export class TasksController {
   }
 
   @Get('/:id')
-  getTaskById(@Param('id', ParseIntPipe) id: number): Promise<TaskEntity> {
+  getTaskById(@Param('id', ParseIntPipe) id: number): Promise<Task> {
     return this.tasksService.getTaskById(id);
   }
 
   @Post()
   @UsePipes(ValidationPipe)
-  createTask(@Body() createTaskDto: CreateTaskDto): Promise<TaskEntity> {
-    return this.tasksService.createTask(createTaskDto);
+  createTask(@Body() createTaskDto: CreateTaskDto, @GetUser() user: User): Promise<Task> {
+    return this.tasksService.createTask(createTaskDto, user);
   }
 
   @Delete('/:id')
@@ -50,7 +52,7 @@ export class TasksController {
   updateTaskStatus(
     @Param('id') id: number,
     @Body('status', TaskStatusValidationPipe) status: TaskStatus,
-  ): Promise<TaskEntity> {
+  ): Promise<Task> {
     return this.tasksService.updateTaskStatus(id, status);
   }
 }
